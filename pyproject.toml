@@ -1,26 +1,74 @@
 [project]
-name = "life-factors-and-student-performace"
-version = "0.1.0"
-description = "Add your description here"
+name = "life-factors-and-student-performance"
+version = "1.0.0"
+description = "ML API to predict student academic risk based on lifestyle factors"
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "black>=25.11.0",
-    "fastapi>=0.121.2",
-    "imblearn>=0.0",
-    "jupyter>=1.1.1",
-    "lightgbm>=4.6.0",
-    "matplotlib>=3.10.7",
-    "mypy>=1.18.2",
-    "numpy>=2.3.5",
-    "pandas>=2.3.3",
-    "pydantic>=2.12.4",
-    "pydantic-settings>=2.12.0",
-    "pytest>=9.0.1",
-    "ruff>=0.14.5",
-    "scikit-learn>=1.7.2",
-    "seaborn>=0.13.2",
-    "shap>=0.49.1",
-    "uvicorn>=0.38.0",
-    "xgboost>=3.1.1",
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Timmy" }
 ]
+keywords = ["machine-learning", "student-performance", "xgboost", "fastapi"]
+
+dependencies = [
+    # FastAPI and server
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    # Machine Learning
+    "scikit-learn>=1.4.0",
+    "xgboost>=2.0.0",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "joblib>=1.3.0",
+    # Utilities
+    "python-multipart>=0.0.6",
+    "python-dotenv>=1.0.0",
+    "pytest>=9.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.26.0",
+    "black>=24.1.0",
+    "ruff>=0.1.0",
+    "mypy>=1.8.0",
+]
+
+notebook = [
+    "jupyter>=1.0.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+]
+
+[project.scripts]
+train = "scripts.train_model:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
