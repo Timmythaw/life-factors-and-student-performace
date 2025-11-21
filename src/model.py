@@ -2,7 +2,7 @@
 Model loading, preprocessing, and prediction service.
 """
 
-import pickle
+import joblib
 import json
 import pandas as pd
 from typing import List
@@ -32,15 +32,13 @@ class ModelService:
                 logger.error(f"Model file not found at {model_path}")
                 return False
 
-            with open(model_path, "rb") as f:
-                self.model = pickle.load(f)
+            self.model = joblib.load(model_path)
             logger.info(f"Model loaded from {model_path}")
 
             # Load scaler
             scaler_path = settings.MODEL_CONFIG.scaler_path
             if scaler_path.exists():
-                with open(scaler_path, "rb") as f:
-                    self.scaler = pickle.load(f)
+                self.scaler = joblib.load(scaler_path)
                 logger.info(f"Scaler loaded from {scaler_path}")
             else:
                 logger.warning("No scaler found, will proceed without scaling")
@@ -66,10 +64,23 @@ class ModelService:
         df = pd.DataFrame([data])
         # Ensure all expected features are present
         if self.feature_names:
+            # Fill missing features with defaults
+            missing = []
             for feature in self.feature_names:
                 if feature not in df.columns:
-                    df[feature] = 0
+                    missing.append(feature)
+                    # Use False for booleans, 0.0 for numerics
+                    if feature in settings.MODEL_CONFIG.categorical_features:
+                        df[feature] = False
+                    elif feature in settings.MODEL_CONFIG.numerical_features:
+                        df[feature] = 0.0
+                    else:
+                        df[feature] = 0
             df = df[self.feature_names]
+            if missing:
+                logger.error(f"Loaded feature names: {self.feature_names}")
+                logger.error(f"DataFrame columns: {list(df.columns)}")
+                logger.error(f"Missing features filled: {missing}")
         # Scale numeric features if scaler exists
         if self.scaler:
             numeric_cols = [
@@ -79,6 +90,7 @@ class ModelService:
             ]
             if numeric_cols:
                 df[numeric_cols] = self.scaler.transform(df[numeric_cols])
+        logger.error(f"Preprocessed DataFrame columns: {list(df.columns)}")
         return df
 
     def predict(self, student: StudentFeatures) -> PredictionOutput:

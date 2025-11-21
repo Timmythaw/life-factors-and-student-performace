@@ -42,8 +42,8 @@ class StudentFeatures(BaseModel):
     alc_level_moderate: bool = Field(..., description="Alcohol level: moderate")
     alc_level_high: bool = Field(..., description="Alcohol level: high")
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "absences": 6,
                 "studytime": 2.0,
@@ -80,6 +80,7 @@ class StudentFeatures(BaseModel):
                 "alc_level_high": False,
             }
         }
+    }
 
 
 class PredictionOutput(BaseModel):
